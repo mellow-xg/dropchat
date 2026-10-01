@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LogOut, Plus, Search } from "lucide-react";
-import { supabase, type Conversation, type Platform } from "@/lib/supabase";
+import { getSupabase, type Conversation, type Platform } from "@/lib/supabase";
 import PlatformBadge from "./PlatformBadge";
 import Avatar from "./Avatar";
 
@@ -61,6 +61,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const supabase = getSupabase();
     supabase.auth.getUser().then(({ data }) => {
       const u = data.user;
       if (u) setUserLabel(u.user_metadata?.full_name ?? u.email ?? "You");
@@ -73,6 +74,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
   }, [query]);
 
   const load = useCallback(async (pageToLoad: number, term: string, f: Filter) => {
+    const supabase = getSupabase();
     setLoading(true);
     let q = supabase
       .from("conversations")
@@ -112,6 +114,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
   }, [hasMore, loading, page, search, filter, load]);
 
   useEffect(() => {
+    const supabase = getSupabase();
     const channel = supabase
       .channel("conversations-feed")
       .on(
@@ -140,7 +143,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
     onSelect(c);
     if ((c.unread_count ?? 0) > 0) {
       setItems((prev) => prev.map((x) => (x.id === c.id ? { ...x, unread_count: 0 } : x)));
-      supabase.from("conversations").update({ unread_count: 0 }).eq("id", c.id).then(() => {});
+      getSupabase().from("conversations").update({ unread_count: 0 }).eq("id", c.id).then(() => {});
     }
   }
 
@@ -153,7 +156,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
         </div>
         <div className="flex items-center gap-1">
           <button
-            onClick={() => supabase.auth.signOut()}
+            onClick={() => getSupabase().auth.signOut()}
             aria-label="Sign out"
             title="Sign out"
             className="rounded-full p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100"
@@ -265,3 +268,4 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
     </aside>
   );
 }
+

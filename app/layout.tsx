@@ -5,8 +5,8 @@ import "./globals.css";
 const font = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Unified Inbox",
-  description: "WhatsApp, Telegram, Instagram and native chats in one place.",
+  title: "Dropchat — Unified Inbox",
+  description: "Manage connected conversations from one inbox.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,3 +18,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase, type Message } from "@/lib/supabase";
+import { getSupabase, type Message } from "@/lib/supabase";
 
 export type RealtimeStatus = "connecting" | "live" | "offline";
 
@@ -17,6 +17,7 @@ export function useRealtimeMessages(conversationId: string | null) {
     }
 
     let cancelled = false;
+    const supabase = getSupabase();
     setLoading(true);
     setMessages([]);
     setStatus("connecting");
@@ -69,3 +70,4 @@ export function useRealtimeMessages(conversationId: string | null) {
 
   return { messages, loading, status };
 }
+
