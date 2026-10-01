@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy, X } from "lucide-react";
-import { BACKEND_URL, supabase } from "@/lib/supabase";
+import { BACKEND_URL, getSupabase } from "@/lib/supabase";
 
 type Tab = "whatsapp" | "telegram" | "instagram";
 const TABS: { id: Tab; label: string }[] = [
@@ -37,7 +37,7 @@ export default function LinkAccountModal({
     setError(null);
     setCode(null);
     try {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await getSupabase().auth.getUser();
       if (!data.user) throw new Error("Not signed in");
       const res = await fetch(`${BACKEND_URL}/api/whatsapp/pair`, {
         method: "POST",
@@ -162,3 +162,4 @@ export default function LinkAccountModal({
     </div>
   );
 }
+

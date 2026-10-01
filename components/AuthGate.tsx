@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { MessagesSquare } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
@@ -13,14 +13,31 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [configurationError, setConfigurationError] = useState(false);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setConfigurationError(true);
+      setReady(true);
+      return;
+    }
+
+    const supabase = getSupabase();
+    let mounted = true;
     supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
       setSession(data.session);
+      setReady(true);
+    }).catch(() => {
+      if (!mounted) return;
+      setConfigurationError(true);
       setReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   async function submit(e: React.FormEvent) {
@@ -28,6 +45,7 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     setBusy(true);
     setMsg(null);
     try {
+      const supabase = getSupabase();
       const { error } =
         mode === "in"
           ? await supabase.auth.signInWithPassword({ email, password })
@@ -42,6 +60,20 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   if (!ready) return <div className="h-dvh bg-zinc-950" />;
+  if (configurationError) {
+    return (
+      <div className="flex h-dvh items-center justify-center bg-zinc-950 p-4">
+        <div className="w-full max-w-lg space-y-3 rounded-2xl bg-zinc-900 p-6 text-zinc-100 ring-1 ring-zinc-800">
+          <h1 className="text-base font-semibold">Supabase setup required</h1>
+          <p className="text-sm text-zinc-300">
+            Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to this
+            deployment&apos;s environment variables, then redeploy. A legacy
+            NEXT_PUBLIC_SUPABASE_ANON_KEY is also supported.
+          </p>
+        </div>
+      </div>
+    );
+  }
   if (session) return <>{children}</>;
 
   return (

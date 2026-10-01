@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check, CheckCheck, Send } from "lucide-react";
-import { BACKEND_URL, supabase, type Conversation, type Message } from "@/lib/supabase";
+import { BACKEND_URL, getSupabase, type Conversation, type Message } from "@/lib/supabase";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import PlatformBadge, { platformLabel } from "./PlatformBadge";
 import Avatar from "./Avatar";
@@ -76,7 +76,7 @@ export default function ChatWindow({
     if (!conversation) return;
     setAccountActive(null);
     setError(null);
-    supabase
+    getSupabase()
       .from("connected_accounts")
       .select("is_active")
       .eq("platform", conversation.platform)
@@ -99,7 +99,7 @@ export default function ChatWindow({
     setSending(true);
     setError(null);
     try {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await getSupabase().auth.getSession();
       const res = await fetch(`${BACKEND_URL}/api/messages/send`, {
         method: "POST",
         headers: {
@@ -271,3 +271,4 @@ export default function ChatWindow({
     </section>
   );
 }
+
