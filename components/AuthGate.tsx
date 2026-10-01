@@ -27,13 +27,18 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    const { error } =
-      mode === "in"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
-    if (error) setMsg(error.message);
-    else if (mode === "up") setMsg("Account created. Check your email to confirm, then sign in.");
-    setBusy(false);
+    try {
+      const { error } =
+        mode === "in"
+          ? await supabase.auth.signInWithPassword({ email, password })
+          : await supabase.auth.signUp({ email, password });
+      if (error) setMsg(error.message);
+      else if (mode === "up") setMsg("Account created. Check your email to confirm, then sign in.");
+    } catch {
+      setMsg("Authentication is temporarily unavailable. Please try again.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   if (!ready) return <div className="h-dvh bg-zinc-950" />;
@@ -98,3 +103,4 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
