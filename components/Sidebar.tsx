@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LogOut, Plus, Search } from "lucide-react";
+import { Instagram, LogOut, Plus, Search } from "lucide-react";
 import { supabase, type Conversation, type Platform } from "@/lib/supabase";
 import PlatformBadge from "./PlatformBadge";
 import Avatar from "./Avatar";
@@ -159,6 +159,14 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
             className="rounded-full p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-zinc-100"
           >
             <LogOut size={18} />
+          </button>
+          <button
+            onClick={() => window.open("https://www.instagram.com/direct/", "_blank", "noopener,noreferrer")}
+            aria-label="Open Instagram Direct"
+            title="Open Instagram Direct"
+            className="rounded-full p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-pink-400"
+          >
+            <Instagram size={18} />
           </button>
           <button
             onClick={onOpenLinkModal}
