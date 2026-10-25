@@ -191,6 +191,23 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
         </div>
       </div>
 
+      <div className="px-4 pb-2">
+        <button
+          type="button"
+          onClick={() => {
+            // Use same-tab navigation so the hosted site and an Android WebView
+            // can open Instagram Direct in their current browsing surface.
+            window.location.assign("https://www.instagram.com/direct/");
+          }}
+          className="flex w-full items-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-200 ring-1 ring-zinc-800 transition hover:bg-zinc-800"
+          aria-label="Open Instagram Direct"
+          title="Open Instagram Direct"
+        >
+          <Instagram size={17} />
+          <span>Open Instagram Direct</span>
+        </button>
+      </div>
+
       <div className="flex gap-1.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none]">
         {FILTERS.map((f) => (
           <button
