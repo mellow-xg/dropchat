@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Instagram, LogOut, Plus, Search } from "lucide-react";
+import { Instagram, LogOut, Plus, Search, X } from "lucide-react";
 import { supabase, type Conversation, type Platform } from "@/lib/supabase";
 import PlatformBadge from "./PlatformBadge";
 import Avatar from "./Avatar";
@@ -58,6 +58,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
   const [userLabel, setUserLabel] = useState("You");
+  const [showInstagramFrame, setShowInstagramFrame] = useState(false);
   const sentinel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -145,6 +146,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
   }
 
   return (
+    <>
     <aside className="flex h-full w-full flex-col border-r border-zinc-800 bg-zinc-950 md:w-96">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
@@ -161,7 +163,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
             <LogOut size={18} />
           </button>
           <button
-            onClick={() => window.open("https://www.instagram.com/direct/", "_blank", "noopener,noreferrer")}
+            onClick={() => setShowInstagramFrame(true)}
             aria-label="Open Instagram Direct"
             title="Open Instagram Direct"
             className="rounded-full p-2 text-zinc-400 transition hover:bg-zinc-800 hover:text-pink-400"
@@ -194,11 +196,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
       <div className="px-4 pb-2">
         <button
           type="button"
-          onClick={() => {
-            // Use same-tab navigation so the hosted site and an Android WebView
-            // can open Instagram Direct in their current browsing surface.
-            window.location.assign("https://www.instagram.com/direct/");
-          }}
+          onClick={() => setShowInstagramFrame(true)}
           className="flex w-full items-center gap-2 rounded-lg bg-zinc-900 px-3 py-2 text-sm font-medium text-zinc-200 ring-1 ring-zinc-800 transition hover:bg-zinc-800"
           aria-label="Open Instagram Direct"
           title="Open Instagram Direct"
@@ -288,5 +286,21 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
         <div ref={sentinel} className="h-8" />
       </div>
     </aside>
+
+    {showInstagramFrame && (
+      <div className="fixed inset-0 z-[100] flex flex-col bg-zinc-950" role="dialog" aria-modal="true" aria-label="Instagram Direct">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-800 px-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+            <Instagram size={18} className="text-pink-400" />
+            Instagram Direct
+          </div>
+          <button type="button" onClick={() => setShowInstagramFrame(false)} aria-label="Close Instagram Direct" title="Close" className="rounded-full p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white">
+            <X size={18} />
+          </button>
+        </div>
+        <iframe title="Instagram Direct" src="https://www.instagram.com/direct/" className="min-h-0 flex-1 border-0 bg-white" allow="clipboard-read; clipboard-write; camera; microphone" referrerPolicy="strict-origin-when-cross-origin" />
+      </div>
+    )}
+    </>
   );
 }
