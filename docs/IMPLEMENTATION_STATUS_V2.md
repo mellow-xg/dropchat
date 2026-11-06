@@ -34,10 +34,10 @@ Native Messages is not the cross-platform aggregate inbox. It must show only con
 
 ## Not yet implemented / not verified
 
-- Native contact discovery and user directory.
-- Native one-to-one conversation creation and secure participant membership.
-- Native group conversations and group administration.
-- Native message server-side authorization and delivery pipeline.
+- Native media upload pipeline and attachment access policies.
+- Native group administration (group creation is supported by the initial RPC, but member management is not).
+- Native delivery/read receipts, presence and typing indicators.
+- Native server-side rate limiting and abuse controls.
 - Native delivery/read receipts, presence and typing indicators.
 - Native media upload pipeline and attachment access policies.
 - Telegram TDLib integration.
@@ -54,18 +54,22 @@ The current UI and data filtering do not, by themselves, prove that these integr
 
 ## Next implementation sequence
 
-### Phase 1A — Native data model
-- Inspect and version the actual Supabase schema.
-- Add profiles and conversation membership with explicit RLS.
-- Define direct-chat creation using a server-validated RPC or trusted server endpoint.
-- Define participant-aware message reads/writes.
-- Add database tests for cross-user access denial.
+### Phase 1A — Native data model (foundation applied)
+- Added `profiles`, `native_conversations`, `native_conversation_participants` and `native_messages`.
+- Enabled RLS on all four tables.
+- Added participant-aware reads and writes, a private membership-check helper, and a constrained conversation-creation RPC.
+- Revoked public/anonymous execution of the automatic RLS event-trigger function.
+- Added the missing composite index for the existing external-message foreign key.
+- Versioned the SQL in `supabase/migrations/`.
+- Remaining verification: two-user isolation tests and an end-to-end native conversation test.
 
-### Phase 1B — Native messaging
-- Add contact discovery with privacy controls.
-- Create or reuse direct conversations.
-- Send native messages through a first-party authorized path, not an external platform bridge.
-- Verify realtime delivery between two independent test accounts.
+### Phase 1B — Native messaging (UI foundation added; test pending)
+- Added `/native` first-party messenger route.
+- Added profile setup with username and display name.
+- Added user lookup and direct/group conversation creation through the RPC.
+- Added participant-scoped message history, realtime updates and native message inserts.
+- Added a link from the main inbox to Dropchat Messenger.
+- Remaining: verify with two accounts, handle duplicate direct chats, add server-side rate limits and test realtime access denial.
 
 ### Phase 1C — Mobile inbox polish
 - Match the supplied mobile reference more closely.
