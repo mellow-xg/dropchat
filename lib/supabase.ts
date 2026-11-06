@@ -30,7 +30,7 @@ export function getSupabase(): SupabaseClient {
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/+$/, "");
 
-export type Platform = "whatsapp" | "telegram" | "instagram" | "native";
+export type Platform = "native" | "whatsapp" | "telegram" | "instagram" | "sms";
 
 export interface Conversation {
   id: string;
