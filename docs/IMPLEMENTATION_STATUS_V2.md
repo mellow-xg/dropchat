@@ -1,0 +1,90 @@
+# Dropchat V2 — Implementation Status
+
+Updated: 6 November 2026  
+Working branch: `v2-native-messenger-foundation`
+
+## Product definition
+
+Dropchat is both:
+- a first-party messenger (Native Messages); and
+- a client shell for separate external messaging environments.
+
+Native Messages is not the cross-platform aggregate inbox. It must show only conversations whose platform is `native`.
+
+## Implemented in this branch
+
+- Added a reusable, horizontally scrollable platform switcher.
+- Added platform entries for Native, WhatsApp, Telegram, Instagram and SMS.
+- Set Native as the initial selected platform.
+- Lifted platform selection into the application shell so switching platform clears the currently open conversation and returns to the selected platform's list.
+- Filtered the conversation query by exactly one selected platform; removed the old All-platform list from the sidebar.
+- Added the platform selector to the conversation view.
+- Added SMS to the TypeScript platform type and badge map.
+- Updated product title and sign-in copy to identify Dropchat as its own messenger.
+- Changed WhatsApp account pairing to send the Supabase access token in an Authorization bearer header instead of trusting a client-supplied user ID.
+- Native conversations no longer require a row in `connected_accounts` to show as connected.
+
+## Existing code reused
+
+- Supabase Auth browser client.
+- Conversation and message tables.
+- Realtime conversation and message subscriptions.
+- Existing bridge endpoint for message sending.
+- Existing WhatsApp pairing flow.
+
+## Not yet implemented / not verified
+
+- Native contact discovery and user directory.
+- Native one-to-one conversation creation and secure participant membership.
+- Native group conversations and group administration.
+- Native message server-side authorization and delivery pipeline.
+- Native delivery/read receipts, presence and typing indicators.
+- Native media upload pipeline and attachment access policies.
+- Telegram TDLib integration.
+- Instagram Direct integration.
+- SMS device integration and Android permission/role handling.
+- WhatsApp/Instagram isolated WebView containers.
+- Platform-specific push notifications.
+- Durable event queue, retry policy, deduplication and synchronization cursors.
+- Offline outgoing-message queue and full local database.
+- Desktop Tauri shell and Android native shell.
+- Automated build, typecheck and end-to-end verification for this branch.
+
+The current UI and data filtering do not, by themselves, prove that these integrations or native messaging features work.
+
+## Next implementation sequence
+
+### Phase 1A — Native data model
+- Inspect and version the actual Supabase schema.
+- Add profiles and conversation membership with explicit RLS.
+- Define direct-chat creation using a server-validated RPC or trusted server endpoint.
+- Define participant-aware message reads/writes.
+- Add database tests for cross-user access denial.
+
+### Phase 1B — Native messaging
+- Add contact discovery with privacy controls.
+- Create or reuse direct conversations.
+- Send native messages through a first-party authorized path, not an external platform bridge.
+- Verify realtime delivery between two independent test accounts.
+
+### Phase 1C — Mobile inbox polish
+- Match the supplied mobile reference more closely.
+- Add bottom navigation, empty/loading/error states and accessible controls.
+- Verify responsive behavior on narrow Android screens.
+
+### Phase 2 — External adapters
+- Implement Telegram only after TDLib authentication/session and lifecycle design is validated.
+- Keep WhatsApp and Instagram WebView sessions isolated; do not claim that isolation eliminates platform enforcement risk.
+- Keep SMS behind Android permission and distribution-policy checks.
+
+## Verification checklist
+
+- [ ] `npm run typecheck`
+- [ ] `npm run build`
+- [ ] Sign in / sign out
+- [ ] Native inbox displays only `platform = 'native'`
+- [ ] Switching platforms clears the selected chat
+- [ ] RLS denies cross-user conversation and message access
+- [ ] Pairing request includes a verified bearer token
+- [ ] Bridge verifies the token and conversation/account ownership
+- [ ] Two test users exchange a native message in realtime
