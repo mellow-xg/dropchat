@@ -5,6 +5,7 @@ import { ArrowLeft, Check, CheckCheck, Send } from "lucide-react";
 import { BACKEND_URL, getSupabase, type Conversation, type Message } from "@/lib/supabase";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import PlatformBadge, { platformLabel } from "./PlatformBadge";
+import PlatformSwitcher from "./PlatformSwitcher";
 import Avatar from "./Avatar";
 
 const clock = (iso: string) =>
@@ -55,9 +56,11 @@ function buildRows(messages: Message[]): Row[] {
 export default function ChatWindow({
   conversation,
   onBack,
+  onPlatformChange,
 }: {
   conversation: Conversation | null;
   onBack?: () => void;
+  onPlatformChange: (platform: Conversation["platform"]) => void;
 }) {
   const { messages, loading, status } = useRealtimeMessages(conversation?.id ?? null);
   const [text, setText] = useState("");
@@ -148,6 +151,12 @@ export default function ChatWindow({
 
   return (
     <section className="flex h-full flex-1 flex-col bg-zinc-900">
+      <div className="border-b border-zinc-800 bg-zinc-950/95">
+        <div className="px-4 pt-3 text-sm font-semibold text-zinc-100">
+          {platformLabel(conversation.platform)} Chat with {conversation.title ?? "Contact"}
+        </div>
+        <PlatformSwitcher value={conversation.platform} onChange={onPlatformChange} />
+      </div>
       <header className="flex items-center gap-3 border-b border-zinc-800 bg-zinc-950 px-4 py-3">
         {onBack && (
           <button
