@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LogOut, Plus, Search } from "lucide-react";
+import { LogOut, MessageCircle, Plus, Search } from "lucide-react";
 import { getSupabase, type Conversation, type Platform } from "@/lib/supabase";
 import PlatformBadge from "./PlatformBadge";
 import PlatformSwitcher from "./PlatformSwitcher";
