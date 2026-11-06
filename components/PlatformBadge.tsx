@@ -1,4 +1,4 @@
-import { Instagram, MessageCircle, MessageSquare, Send } from "lucide-react";
+import { Instagram, MessageCircle, MessageSquare, Send, Smartphone } from "lucide-react";
 import type { Platform } from "@/lib/supabase";
 
 const STYLES: Record<Platform, { bg: string; label: string; Icon: typeof Send }> = {
@@ -10,6 +10,7 @@ const STYLES: Record<Platform, { bg: string; label: string; Icon: typeof Send }>
     Icon: Instagram,
   },
   native: { bg: "bg-purple-500", label: "Native", Icon: MessageSquare },
+  sms: { bg: "bg-indigo-500", label: "SMS", Icon: Smartphone },
 };
 
 export function platformLabel(p: Platform) {
