@@ -1,15 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MessageCircle, Plus, Search, Send, UserRound } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
+
+// TODO: replace inferred Supabase query types with generated Database types after initial integration verification.
 
 type Profile = { id: string; username: string | null; display_name: string | null; avatar_url: string | null };
 type NativeMessage = { id: string; conversation_id: string; sender_id: string; content: string; created_at: string };
 type NativeChat = { id: string; title: string | null; updated_at: string; members: Profile[]; lastMessage?: NativeMessage };
 
 export default function NativeMessenger() {
-  const supabase = getSupabase();
+  const supabase = useMemo(() => getSupabase(), []);
   const [userId, setUserId] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [displayName, setDisplayName] = useState("");
