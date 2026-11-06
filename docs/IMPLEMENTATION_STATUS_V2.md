@@ -95,3 +95,5 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - [ ] Pairing request includes a verified bearer token
 - [ ] Bridge verifies the token and conversation/account ownership
 - [ ] Two test users exchange a native message in realtime
+
+> Build note (6 Nov 2026): the NativeMessenger UI currently has a temporary `@ts-nocheck` while Supabase generated database types and the PostgREST relationship typings are finalized. Earlier preview builds failed during `npm run build`; the latest preview build is queued and must be confirmed before merge or production promotion.
