@@ -60,6 +60,9 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - Added participant-aware reads and writes, a private membership-check helper, and a constrained conversation-creation RPC.
 - Revoked public/anonymous execution of the automatic RLS event-trigger function.
 - Added the missing composite index for the existing external-message foreign key.
+- Added message activity triggers for chat previews and per-user read-state updates.
+- Enabled Realtime publication for `native_messages`.
+- Kept the public conversation-creation RPC as `SECURITY INVOKER`; privileged implementation is isolated in the non-exposed `private` schema.
 - Versioned the SQL in `supabase/migrations/`.
 - Remaining verification: two-user isolation tests and an end-to-end native conversation test.
 
