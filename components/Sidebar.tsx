@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Instagram, LogOut, Plus, Search, X } from "lucide-react";
+import { Instagram, LogOut, MessageCircle, Plus, Search, X } from "lucide-react";
 import { supabase, type Conversation, type Platform } from "@/lib/supabase";
 import PlatformBadge from "./PlatformBadge";
 import Avatar from "./Avatar";
@@ -179,6 +179,13 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
             <Plus size={18} />
           </button>
         </div>
+      </div>
+
+      <div className="px-4 pb-2">
+        <a href="/native" className="flex w-full items-center gap-2 rounded-lg bg-sky-950/60 px-3 py-2 text-sm font-medium text-sky-200 ring-1 ring-sky-900 transition hover:bg-sky-900/70">
+          <MessageCircle size={17} />
+          <span>Open Dropchat Messenger</span>
+        </a>
       </div>
 
       <div className="px-4 pb-2">
