@@ -79,6 +79,10 @@ export default function ChatWindow({
     if (!conversation) return;
     setAccountActive(null);
     setError(null);
+    if (conversation.platform === "native") {
+      setAccountActive(true);
+      return;
+    }
     getSupabase()
       .from("connected_accounts")
       .select("is_active")
