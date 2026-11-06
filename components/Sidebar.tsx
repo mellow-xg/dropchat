@@ -182,21 +182,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal, selectedP
         </div>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none]">
-        {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setFilter(f.id)}
-            className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition ${
-              filter === f.id
-                ? "bg-slate-600 text-white"
-                : "bg-zinc-900 text-zinc-400 ring-1 ring-zinc-800 hover:text-zinc-200"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      <PlatformSwitcher value={filter} onChange={onPlatformChange} />
 
       <div className="flex-1 overflow-y-auto">
         {loading && items.length === 0 && <SkeletonRows />}
