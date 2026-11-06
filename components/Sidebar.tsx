@@ -41,13 +41,15 @@ interface Props {
   activeId: string | null;
   onSelect: (c: Conversation) => void;
   onOpenLinkModal: () => void;
+  selectedPlatform: Platform;
+  onPlatformChange: (platform: Platform) => void;
 }
 
-export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) {
+export default function Sidebar({ activeId, onSelect, onOpenLinkModal, selectedPlatform, onPlatformChange }: Props) {
   const [items, setItems] = useState<Conversation[]>([]);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<Filter>("native");
+  const filter: Filter = selectedPlatform;
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
