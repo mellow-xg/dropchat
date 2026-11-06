@@ -5,8 +5,8 @@ import "./globals.css";
 const font = Manrope({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Dropchat — Unified Inbox",
-  description: "Manage connected conversations from one inbox.",
+  title: "Dropchat — Native Messenger",
+  description: "Dropchat native messaging with separate connected platform experiences.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
