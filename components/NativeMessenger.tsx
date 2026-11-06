@@ -73,6 +73,13 @@ export default function NativeMessenger() {
   useEffect(() => {
     if (!active) { setMessages([]); return; }
     loadMessages(active.id);
+    if (userId) {
+      supabase.from("native_conversation_participants")
+        .update({ last_read_at: new Date().toISOString() })
+        .eq("conversation_id", active.id)
+        .eq("user_id", userId)
+        .then(() => {});
+    }
     const channel = supabase.channel("native-messages-" + active.id)
       .on("postgres_changes", { event: "*", schema: "public", table: "native_messages", filter: "conversation_id=eq." + active.id },
         () => loadMessages(active.id))
