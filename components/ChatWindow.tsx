@@ -103,6 +103,10 @@ export default function ChatWindow({
   async function send() {
     const body = text.trim();
     if (!body || !conversation || sending) return;
+    if (conversation.platform === "native") {
+      setError("Native message delivery is not connected yet. The Native inbox foundation is in place; the first-party messaging service is the next build phase.");
+      return;
+    }
     setSending(true);
     setError(null);
     try {
@@ -139,7 +143,9 @@ export default function ChatWindow({
   }
 
   const statusText =
-    status === "offline"
+    conversation.platform === "native"
+      ? "Native service setup pending"
+      : status === "offline"
       ? "Reconnecting…"
       : accountActive === false
       ? `${platformLabel(conversation.platform)} not linked`
@@ -147,7 +153,9 @@ export default function ChatWindow({
       ? "Live"
       : "Connecting…";
   const statusColor =
-    status === "live" && accountActive !== false
+    conversation.platform === "native"
+      ? "bg-amber-500"
+      : status === "live" && accountActive !== false
       ? "bg-green-500"
       : status === "offline" || accountActive === false
       ? "bg-red-500"
