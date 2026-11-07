@@ -1,20 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LogOut, Plus, Search } from "lucide-react";
+import { LogOut, MessageCircle, Plus, Search } from "lucide-react";
 import { getSupabase, type Conversation, type Platform } from "@/lib/supabase";
 import PlatformBadge from "./PlatformBadge";
+import PlatformSwitcher from "./PlatformSwitcher";
 import Avatar from "./Avatar";
 
 const PAGE_SIZE = 30;
-type Filter = "all" | Platform;
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "whatsapp", label: "WhatsApp" },
-  { id: "telegram", label: "Telegram" },
-  { id: "instagram", label: "Instagram" },
-  { id: "native", label: "Native" },
-];
+type Filter = Platform;
 
 function formatTime(iso: string | null) {
   if (!iso) return "";
@@ -47,13 +41,15 @@ interface Props {
   activeId: string | null;
   onSelect: (c: Conversation) => void;
   onOpenLinkModal: () => void;
+  selectedPlatform: Platform;
+  onPlatformChange: (platform: Platform) => void;
 }
 
-export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) {
+export default function Sidebar({ activeId, onSelect, onOpenLinkModal, selectedPlatform, onPlatformChange }: Props) {
   const [items, setItems] = useState<Conversation[]>([]);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<Filter>("all");
+  const filter: Filter = selectedPlatform;
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -82,7 +78,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
       .order("last_message_at", { ascending: false, nullsFirst: false })
       .range(pageToLoad * PAGE_SIZE, pageToLoad * PAGE_SIZE + PAGE_SIZE - 1);
     if (term) q = q.ilike("title", `%${term}%`);
-    if (f !== "all") q = q.eq("platform", f);
+    q = q.eq("platform", f);
     const { data } = await q;
     const rows = (data ?? []) as Conversation[];
     setItems((prev) => (pageToLoad === 0 ? rows : [...prev, ...rows]));
@@ -123,7 +119,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
         (payload) => {
           const row = payload.new as Conversation;
           if (!row?.id) return;
-          if (filter !== "all" && row.platform !== filter) return;
+          if (row.platform !== filter) return;
           setItems((prev) =>
             [row, ...prev.filter((c) => c.id !== row.id)].sort(
               (a, b) =>
@@ -152,7 +148,7 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
           <Avatar name={userLabel} size={36} />
-          <span className="truncate text-sm font-semibold text-zinc-100">{userLabel}</span>
+          <div className="min-w-0"><h1 className="truncate text-base font-semibold text-zinc-100">{filter === "native" ? "Native Messages" : `${filter[0].toUpperCase()}${filter.slice(1)} Messages`}</h1><p className="text-[11px] text-zinc-500">Dropchat messenger</p></div>
         </div>
         <div className="flex items-center gap-1">
           <button
@@ -165,8 +161,8 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
           </button>
           <button
             onClick={onOpenLinkModal}
-            aria-label="Link accounts"
-            title="Link accounts"
+            aria-label="Link external accounts"
+            title="Link external accounts"
             className="rounded-full bg-slate-700 p-2 text-zinc-100 transition hover:bg-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
           >
             <Plus size={18} />
@@ -186,30 +182,18 @@ export default function Sidebar({ activeId, onSelect, onOpenLinkModal }: Props) 
         </div>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none]">
-        {FILTERS.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => setFilter(f.id)}
-            className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition ${
-              filter === f.id
-                ? "bg-slate-600 text-white"
-                : "bg-zinc-900 text-zinc-400 ring-1 ring-zinc-800 hover:text-zinc-200"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      <PlatformSwitcher value={filter} onChange={onPlatformChange} />
 
       <div className="flex-1 overflow-y-auto">
         {loading && items.length === 0 && <SkeletonRows />}
 
         {items.length === 0 && !loading && (
           <p className="px-6 py-10 text-center text-sm text-zinc-500">
-            {search || filter !== "all"
-              ? "No chats match. Try another search or filter."
-              : "No chats yet. Tap + to link your first account."}
+            {search
+              ? "No conversations match this search."
+              : filter === "native"
+              ? "No Dropchat conversations yet. Start a native conversation when contacts are available."
+              : `No ${filter} conversations are available for this account yet.`}
           </p>
         )}
 

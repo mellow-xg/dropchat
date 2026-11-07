@@ -1,0 +1,4 @@
+-- Usernames are case-insensitive; prevent impersonation by case variants.
+create unique index if not exists profiles_username_lower_unique
+on public.profiles (lower(username))
+where username is not null;

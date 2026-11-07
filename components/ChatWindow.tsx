@@ -5,6 +5,7 @@ import { ArrowLeft, Check, CheckCheck, Send } from "lucide-react";
 import { BACKEND_URL, getSupabase, type Conversation, type Message } from "@/lib/supabase";
 import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import PlatformBadge, { platformLabel } from "./PlatformBadge";
+import PlatformSwitcher from "./PlatformSwitcher";
 import Avatar from "./Avatar";
 
 const clock = (iso: string) =>
@@ -55,9 +56,11 @@ function buildRows(messages: Message[]): Row[] {
 export default function ChatWindow({
   conversation,
   onBack,
+  onPlatformChange,
 }: {
   conversation: Conversation | null;
   onBack?: () => void;
+  onPlatformChange: (platform: Conversation["platform"]) => void;
 }) {
   const { messages, loading, status } = useRealtimeMessages(conversation?.id ?? null);
   const [text, setText] = useState("");
@@ -76,6 +79,10 @@ export default function ChatWindow({
     if (!conversation) return;
     setAccountActive(null);
     setError(null);
+    if (conversation.platform === "native") {
+      setAccountActive(true);
+      return;
+    }
     getSupabase()
       .from("connected_accounts")
       .select("is_active")
@@ -96,6 +103,10 @@ export default function ChatWindow({
   async function send() {
     const body = text.trim();
     if (!body || !conversation || sending) return;
+    if (conversation.platform === "native") {
+      setError("Native message delivery is not connected yet. The Native inbox foundation is in place; the first-party messaging service is the next build phase.");
+      return;
+    }
     setSending(true);
     setError(null);
     try {
@@ -132,7 +143,9 @@ export default function ChatWindow({
   }
 
   const statusText =
-    status === "offline"
+    conversation.platform === "native"
+      ? "Native service setup pending"
+      : status === "offline"
       ? "Reconnecting…"
       : accountActive === false
       ? `${platformLabel(conversation.platform)} not linked`
@@ -140,7 +153,9 @@ export default function ChatWindow({
       ? "Live"
       : "Connecting…";
   const statusColor =
-    status === "live" && accountActive !== false
+    conversation.platform === "native"
+      ? "bg-amber-500"
+      : status === "live" && accountActive !== false
       ? "bg-green-500"
       : status === "offline" || accountActive === false
       ? "bg-red-500"
@@ -148,6 +163,12 @@ export default function ChatWindow({
 
   return (
     <section className="flex h-full flex-1 flex-col bg-zinc-900">
+      <div className="border-b border-zinc-800 bg-zinc-950/95">
+        <div className="px-4 pt-3 text-sm font-semibold text-zinc-100">
+          {platformLabel(conversation.platform)} Chat with {conversation.title ?? "Contact"}
+        </div>
+        <PlatformSwitcher value={conversation.platform} onChange={onPlatformChange} />
+      </div>
       <header className="flex items-center gap-3 border-b border-zinc-800 bg-zinc-950 px-4 py-3">
         {onBack && (
           <button

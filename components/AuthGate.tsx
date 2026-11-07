@@ -87,8 +87,8 @@ export default function AuthGate({ children }: { children: React.ReactNode }) {
             <MessagesSquare size={20} />
           </span>
           <div>
-            <h1 className="text-base font-semibold text-zinc-100">Unified Inbox</h1>
-            <p className="text-xs text-zinc-400">All your chats in one place</p>
+            <h1 className="text-base font-semibold text-zinc-100">Dropchat</h1>
+            <p className="text-xs text-zinc-400">Your native messenger and connected platforms</p>
           </div>
         </div>
 

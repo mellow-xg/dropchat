@@ -37,12 +37,16 @@ export default function LinkAccountModal({
     setError(null);
     setCode(null);
     try {
-      const { data } = await getSupabase().auth.getUser();
-      if (!data.user) throw new Error("Not signed in");
+      const { data } = await getSupabase().auth.getSession();
+      if (!data.session) throw new Error("Not signed in");
+      if (!BACKEND_URL) throw new Error("Bridge backend is not configured");
       const res = await fetch(`${BACKEND_URL}/api/whatsapp/pair`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: data.user.id, phoneNumber: digits }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.session.access_token}`,
+        },
+        body: JSON.stringify({ phoneNumber: digits }),
       });
       if (!res.ok) throw new Error(await res.text());
       const json = await res.json();

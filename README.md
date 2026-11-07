@@ -1,14 +1,29 @@
 # Dropchat
 
-Dropchat is a chat inbox for reading and sending messages across connected platforms. The Next.js app uses Supabase for authentication, conversation data, and realtime updates. A separately operated bridge backend handles platform-specific delivery and WhatsApp account pairing.
+Dropchat is a first-party messaging service and a multi-platform messaging client.
+
+**Important product boundary:** Native Messages is Dropchat's own messenger. WhatsApp, Telegram, Instagram Direct and SMS are separate messaging environments. Selecting a platform filters/navigates to that platform; external conversations are not mixed into the Native Messages inbox.
+
+## Current application
+
+- Next.js App Router, React and TypeScript.
+- Supabase Auth and PostgreSQL conversation/message data.
+- Realtime conversation and message subscriptions.
+- Platform selector for Native, WhatsApp, Telegram, Instagram and SMS.
+- Native is the default inbox and is queried separately with `platform = 'native'`.
+- WhatsApp pairing uses the separately operated bridge backend.
+- Telegram and Instagram linking are not implemented in this repository yet.
+- SMS is currently a navigation/type placeholder; device SMS integration is not implemented.
+- The Native inbox UI is separated, but first-party contact discovery, direct-chat creation, group membership and a complete native messaging service are still development work.
 
 ## Project structure
 
 ```text
-app/          Next.js App Router pages, layout, and global styles
-components/   Reusable chat and authentication UI
+app/          Next.js App Router pages, layout and global styles
+components/   Authentication, platform switcher, conversation list and chat UI
 hooks/        Client-side realtime message hooks
-lib/          Shared Supabase client, types, and configuration
+lib/          Supabase client and shared types
+utils/        Supabase server/session helpers
 ```
 
 ## Local setup
@@ -19,7 +34,7 @@ lib/          Shared Supabase client, types, and configuration
    npm install
    ```
 
-2. Copy `.env.example` to `.env.local` and add your project values.
+2. Copy `.env.example` to `.env.local` and configure the Supabase URL and publishable key.
 
 3. Start the development server:
 
@@ -27,49 +42,49 @@ lib/          Shared Supabase client, types, and configuration
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000).
+4. Open http://localhost:3000.
 
 ## Environment variables
 
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (a legacy anon key is also accepted by Supabase) |
-| `NEXT_PUBLIC_BACKEND_URL` | HTTPS URL of the deployed Dropchat bridge backend |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key (legacy anon key is also accepted) |
+| `NEXT_PUBLIC_BACKEND_URL` | HTTPS URL of the separately deployed Dropchat bridge backend |
 
-The first two values are required. Never place a Supabase secret or service-role key in a `NEXT_PUBLIC_` variable or in browser code.
+Never put a Supabase secret/service-role key or platform credential in a `NEXT_PUBLIC_` variable or browser code.
 
-## Backend requirements
+## Bridge backend contract
 
-The frontend expects the backend to:
+The current frontend expects the separately deployed backend to:
 
 - expose `POST /api/messages/send`;
-- expose `POST /api/whatsapp/pair` and return `{ "code": "ABCD1234" }`;
-- accept the frontend origin through CORS; and
-- validate the Supabase access token sent by authenticated requests and derive the user identity from its verified claims (never trust a user ID supplied in the request body);
-- enforce ownership checks for the requested conversation/account; and
-- run behind HTTPS with restrictive CORS for the production app origin.
+- expose `POST /api/whatsapp/pair`;
+- validate the Supabase access token from the Authorization bearer header;
+- derive the user identity from verified token claims, never from a client-supplied user ID;
+- verify ownership of every conversation and connected account;
+- enforce restrictive CORS and HTTPS in production.
 
-## Database note
+The bridge service is not included in this repository. A successful frontend build does not prove that the bridge is deployed or that message delivery works.
 
-Unread badges expect an `unread_count` column on `conversations`:
+## Database and authorization
+
+The existing application expects `connected_accounts`, `conversations` and `messages`. Unread badges also expect:
 
 ```sql
-alter table conversations
+alter table public.conversations
 add column if not exists unread_count integer not null default 0;
 ```
 
-Before launch, enable Row Level Security on every exposed table (including `conversations`, `messages`, `connected_accounts`, and `todos`, if used). Policies must scope reads and writes to the authenticated owner; do not rely on client-side filters. Ensure Realtime is enabled only for the tables and access model you intend to expose.
+Enable and test RLS on every exposed table. Policies must scope records to the authenticated user or authorized conversation membership. Do not rely on client-side filters as an authorization boundary. Realtime publication and storage access must follow the same ownership model.
 
-## Production launch checklist
+## V2 product rules
 
-- Configure the production Supabase URL and publishable key and the HTTPS bridge URL in Vercel for Production; use separate projects/keys for Preview where possible.
-- Configure Supabase Auth site URL, allowed redirect URLs, email confirmation, SMTP, and password/security settings for the production domain.
-- Apply and review database migrations and owner-scoped RLS policies in the production Supabase project.
-- Deploy and monitor the bridge backend separately; this repository does not contain that service.
-- Confirm WhatsApp pairing and message delivery end to end. Telegram and Instagram linking are not implemented yet.
-- Set a custom domain, verify HTTPS, and test sign-up, sign-in, session refresh, sign-out, realtime, and failure states before inviting users.
+1. Native Messages contains Dropchat-native conversations only.
+2. External platform views remain separate and use platform-specific integration adapters.
+3. Same display names across platforms do not imply the same identity.
+4. UI controls must not imply unsupported capabilities such as calling, background notifications or message synchronization.
+5. Each adapter must publish a capability list based on verified implementation behavior.
+6. Offline cached history and queued sending must be tested per platform before being advertised.
 
-The app's `/todos` route is a protected Supabase example route; it requires a `todos` table with `id` and `name` columns and appropriate RLS policies. The main `/` route is the chat inbox.
-
-
+See [V2 implementation status](docs/IMPLEMENTATION_STATUS_V2.md) for current scope and next steps.
