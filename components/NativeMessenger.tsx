@@ -116,7 +116,7 @@ export default function NativeMessenger() {
     if (!userId) return;
     setBusy(true); setProfileError("");
     const { data, error: saveError } = await supabase.from("profiles").upsert({
-      id: userId, display_name: displayName.trim(), username: username.trim().replace(/^@/, ""),
+      id: userId, display_name: displayName.trim(), username: username.trim().replace(/^@/, "").toLowerCase(),
     }).select().single();
     if (saveError) setProfileError(saveError.message);
     else setProfile(data as Profile);
