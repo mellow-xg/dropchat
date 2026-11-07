@@ -66,6 +66,7 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - Enabled Realtime publication for `native_messages`.
 - Kept the public conversation-creation RPC as `SECURITY INVOKER`; privileged implementation is isolated in the non-exposed `private` schema.
 - Added a private direct-pair registry with a unique key to prevent duplicate one-to-one conversations under concurrent requests.
+- Enforced case-insensitive username uniqueness and lowercase normalization on profile creation.
 - Versioned the SQL in `supabase/migrations/`.
 - Remaining verification: two-user isolation tests and an end-to-end native conversation test.
 
