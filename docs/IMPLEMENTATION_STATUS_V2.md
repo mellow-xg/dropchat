@@ -65,6 +65,7 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - Added a database-side throttle of 30 accepted messages per sender per rolling minute.
 - Enabled Realtime publication for `native_messages`.
 - Kept the public conversation-creation RPC as `SECURITY INVOKER`; privileged implementation is isolated in the non-exposed `private` schema.
+- Added a private direct-pair registry with a unique key to prevent duplicate one-to-one conversations under concurrent requests.
 - Versioned the SQL in `supabase/migrations/`.
 - Remaining verification: two-user isolation tests and an end-to-end native conversation test.
 
@@ -99,4 +100,4 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - [ ] Bridge verifies the token and conversation/account ownership
 - [ ] Two test users exchange a native message in realtime
 
- > Build note (7 Nov 2026): the NativeMessenger UI still has a temporary `@ts-nocheck` while generated Supabase database types and PostgREST relationship typings are finalized. Earlier preview builds failed; the newest preview deployment must pass before merge or production promotion.
+> Build note (7 Nov 2026): the NativeMessenger UI still has a temporary `@ts-nocheck` while generated Supabase database types and PostgREST relationship typings are finalized. Earlier preview builds failed; the newest preview deployment must pass before merge or production promotion.
