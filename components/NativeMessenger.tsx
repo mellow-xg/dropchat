@@ -11,7 +11,7 @@ import { getSupabase } from "@/lib/supabase";
 
 type Profile = { id: string; username: string | null; display_name: string | null; avatar_url: string | null };
 type NativeMessage = { id: string; conversation_id: string; sender_id: string; content: string; created_at: string };
-type NativeChat = { id: string; title: string | null; updated_at: string; members: Profile[]; lastMessage?: NativeMessage };
+type NativeChat = { id: string; title: string | null; updated_at: string; last_message: string | null; last_message_at: string | null; members: Profile[] };
 
 export default function NativeMessenger() {
   const supabase = useMemo(() => getSupabase(), []);
@@ -38,26 +38,24 @@ export default function NativeMessenger() {
     const ids = (memberships ?? []).map((m) => m.conversation_id);
     if (!ids.length) { setChats([]); return; }
     const [{ data: conversations, error: chatsError }, { data: participantRows }] = await Promise.all([
-      supabase.from("native_conversations").select("id,title,updated_at").in("id", ids).order("updated_at", { ascending: false }),
+      supabase.from("native_conversations").select("id,title,updated_at,last_message,last_message_at").in("id", ids).order("updated_at", { ascending: false }),
       supabase.from("native_conversation_participants").select("conversation_id,user_id,profiles(id,username,display_name,avatar_url)").in("conversation_id", ids),
     ]);
     if (chatsError) { setError(chatsError.message); return; }
-    const { data: latest } = await supabase.from("native_messages").select("*").in("conversation_id", ids).order("created_at", { ascending: false }).limit(300);
     const next = (conversations ?? []).map((c) => ({
       ...c,
       members: (participantRows ?? []).filter((p) => p.conversation_id === c.id).map((p) => p.profiles).filter(Boolean) as Profile[],
-      lastMessage: (latest ?? []).find((m) => m.conversation_id === c.id) as NativeMessage | undefined,
     })) as NativeChat[];
     setChats(next);
     setActive((current) => current ? next.find((c) => c.id === current.id) ?? current : null);
-  }, []);
+  }, [supabase]);
 
   const loadMessages = useCallback(async (conversationId: string) => {
     const { data, error: messageError } = await supabase.from("native_messages").select("*")
       .eq("conversation_id", conversationId).order("created_at", { ascending: true }).limit(300);
     if (messageError) setError(messageError.message);
     else setMessages((data ?? []) as NativeMessage[]);
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     let alive = true;
@@ -90,7 +88,7 @@ export default function NativeMessenger() {
         () => loadMessages(active.id))
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [active?.id, loadMessages]);
+  }, [active?.id, userId, loadMessages, supabase]);
 
   useEffect(() => {
     if (!userId) return;
@@ -103,7 +101,7 @@ export default function NativeMessenger() {
 
   useEffect(() => {
     let alive = true;
-    const term = query.trim();
+    const term = query.trim().replace(/[,%()]/g, "");
     if (!term || !userId) { setPeople([]); return; }
     const timer = setTimeout(async () => {
       const { data } = await supabase.from("profiles").select("id,username,display_name,avatar_url")
@@ -111,7 +109,7 @@ export default function NativeMessenger() {
       if (alive) setPeople((data ?? []) as Profile[]);
     }, 250);
     return () => { alive = false; clearTimeout(timer); };
-  }, [query, userId]);
+  }, [query, userId, supabase]);
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -192,7 +190,7 @@ export default function NativeMessenger() {
         <div className="flex-1 overflow-y-auto">
           {chats.map((chat) => <button key={chat.id} onClick={() => setActive(chat)} className={"flex w-full items-center gap-3 border-b border-zinc-900 p-4 text-left hover:bg-zinc-900 " + (active?.id === chat.id ? "bg-zinc-900" : "")}>
             <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sky-950 text-sky-300">{initials(titleFor(chat))}</span>
-            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{titleFor(chat)}</span><span className="block truncate text-xs text-zinc-500">{chat.lastMessage?.content || "Start a conversation"}</span></span>
+            <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium">{titleFor(chat)}</span><span className="block truncate text-xs text-zinc-500">{chat.last_message || "Start a conversation"}</span></span>
           </button>)}
           {chats.length === 0 && <p className="p-8 text-center text-sm text-zinc-500">No Dropchat conversations yet. Start a new chat.</p>}
         </div>
