@@ -129,7 +129,7 @@ export default function NativeMessenger() {
     if (createError) setError(createError.message);
     else {
       await loadChats(userId!);
-      const { data: chat } = await supabase.from("native_conversations").select("id,title,updated_at").eq("id", data).single();
+      const { data: chat } = await supabase.from("native_conversations").select("id,title,updated_at,last_message,last_message_at").eq("id", data).single();
       if (chat) {
         const item: NativeChat = { ...chat, members: [profile!, person] };
         setChats((prev) => [item, ...prev.filter((c) => c.id !== item.id)]);
