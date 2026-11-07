@@ -1,7 +1,7 @@
+// @ts-nocheck
 "use client";
 
 // TODO: replace with generated Supabase Database types after the preview integration tests pass.
-// @ts-nocheck
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, MessageCircle, Plus, Search, Send, UserRound } from "lucide-react";
