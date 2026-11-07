@@ -37,7 +37,7 @@ Native Messages is not the cross-platform aggregate inbox. It must show only con
 - Native media upload pipeline and attachment access policies.
 - Native group administration (group creation is supported by the initial RPC, but member management is not).
 - Native delivery/read receipts, presence and typing indicators.
-- Native server-side rate limiting and abuse controls.
+- Native abuse controls beyond the initial database message throttle (spam reports, blocks and moderation).
 - Native delivery/read receipts, presence and typing indicators.
 - Native media upload pipeline and attachment access policies.
 - Telegram TDLib integration.
@@ -61,6 +61,8 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - Revoked public/anonymous execution of the automatic RLS event-trigger function.
 - Added the missing composite index for the existing external-message foreign key.
 - Added message activity triggers for chat previews and per-user read-state updates.
+- Restricted participant updates to the `last_read_at` column so users cannot move their membership into another conversation.
+- Added a database-side throttle of 30 accepted messages per sender per rolling minute.
 - Enabled Realtime publication for `native_messages`.
 - Kept the public conversation-creation RPC as `SECURITY INVOKER`; privileged implementation is isolated in the non-exposed `private` schema.
 - Versioned the SQL in `supabase/migrations/`.
@@ -71,6 +73,7 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - Added profile setup with username and display name.
 - Added user lookup and direct/group conversation creation through the RPC.
 - Added participant-scoped message history, realtime updates and native message inserts.
+- Added conversation preview fields and reduced inbox preview loading to one conversation query.
 - Added a link from the main inbox to Dropchat Messenger.
 - Remaining: verify with two accounts, handle duplicate direct chats, add server-side rate limits and test realtime access denial.
 
@@ -96,4 +99,4 @@ The current UI and data filtering do not, by themselves, prove that these integr
 - [ ] Bridge verifies the token and conversation/account ownership
 - [ ] Two test users exchange a native message in realtime
 
-> Build note (6 Nov 2026): the NativeMessenger UI currently has a temporary `@ts-nocheck` while Supabase generated database types and the PostgREST relationship typings are finalized. Earlier preview builds failed during `npm run build`; the latest preview build is queued and must be confirmed before merge or production promotion.
+ > Build note (7 Nov 2026): the NativeMessenger UI still has a temporary `@ts-nocheck` while generated Supabase database types and PostgREST relationship typings are finalized. Earlier preview builds failed; the newest preview deployment must pass before merge or production promotion.
